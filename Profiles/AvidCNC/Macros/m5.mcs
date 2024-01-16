@@ -1,0 +1,54 @@
+-- Custom spindle control for HITECO ATC
+-- stopping process
+
+--package.path = package.path .. ";c:\\Mach4Hobby\\Modules\\CorbinsWorkshop\\?.lua"
+
+
+-- todo: test removing these as the load_modules should do it.
+if CWUtilities == nil then 
+	CWUtilities = require "CWUtilities"
+end
+
+if ToolChange == nil then
+	ToolChange = require "ToolChange"
+end
+
+if ToolForks == nil then
+	ToolForks = require "ToolForks"
+end
+
+
+function m5()
+	local inst = mc.mcGetInstance()
+--	mc.mcCntlSetLastError(inst, "M5: Turning off the spindle")
+
+	-- stop the spindle, if it isn't running
+	dir, rc = mc.mcSpindleGetDirection(inst)
+	if dir ~= mc.MC_SPINDLE_OFF then
+		-- the "Wait" version of this method does not work for me...it just hangs.
+		result = mc.mcSpindleSetDirection(inst, mc.MC_SPINDLE_OFF)
+
+		if result == mc.MERROR_NOERROR then
+			--mc.mcCntlSetLastError(inst, "Spindle now OFF.")
+		elseif result == mc.MERROR_TIMED_OUT then
+			mc.mcCntlSetLastError(inst, "ERROR: spindle timed out.")
+		else 
+			mc.mcCntlSetLastError(inst, "ERROR: got an error turning on the spindle: "..result)
+		end
+		
+		-- save the time we turned off the spindle
+		ToolChange.lastSpindleStopTime = os.clock()
+		
+		if ToolForks.GetShouldUseCasePressurization() then
+			CWUtilities.SetAirPressure(0)
+		end		
+	end
+
+	return 0
+end
+
+-- testing
+if (mc.mcInEditor() == 1) then
+ m5()
+
+end

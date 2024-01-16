@@ -1,0 +1,7 @@
+-- added by Lazerwolf - github
+
+package.path = package.path .. ";./Modules/CorbinsWorkshop/?.lua"
+
+function m106()
+    ATCTools.PutBackCurrentTool()
+end

@@ -1,0 +1,82 @@
+-- Custom spindle start control for HITECO ATC (or any other ATC spindle)
+-- by corbin dunn
+-- provided as-is! No warranty that it will work for you.
+
+-- for debugging! Not needed under normal module load
+--package.path = package.path .. ";c:\\Mach4Hobby\\Modules\\CorbinsWorkshop\\?.lua"
+
+if CWUtilities == nil then 
+	CWUtilities = require "CWUtilities"
+end
+
+if ToolForks == nil then
+	ToolForks = require "ToolForks"
+end
+
+
+function IsSpindleOn() 
+	local inst = mc.mcGetInstance()
+
+	local sigh = mc.mcSignalGetHandle(inst, mc.OSIG_SPINDLEON);
+	local sigState = mc.mcSignalGetState(sigh);
+
+	if (sigState == 1) then
+		return true;
+	else 
+		return false;
+	end
+end
+
+
+function m3()
+	local inst = mc.mcGetInstance("m3")
+
+
+	local dir = mc.mcSpindleGetDirection(inst)
+	-- only do something if it isn't running..or else we have to stop and change the dirction
+	if dir == mc.MC_SPINDLE_OFF then 
+		if ToolForks.GetShouldUseCasePressurization() then			
+			CWUtilities.SetAirPressure(1)
+		end
+
+		-- the setDirectionWait version does not ever return for me...i wonder what it is waiting on?
+		-- The bit is set..but i guess the RPM sensor is not available or hooked up
+		local result = mc.mcSpindleSetDirection(inst, mc.MC_SPINDLE_FWD)
+		if result == mc.MERROR_NOERROR then
+--			mc.mcCntlSetLastError(inst, "Spindle now on, rc:"..result)
+		elseif result == mc.MERROR_TIMED_OUT then
+			mc.mcCntlSetLastError(inst, "ERROR: spindle timed out.")
+		else 
+			mc.mcCntlSetLastError(inst, "ERROR: got an error turning on the spindle: "..result)
+		end
+		
+		-- check the state
+		if IsSpindleOn() then
+			--RPM, rc = mc.mcSpindleGetSensorRPM(inst)
+			--	mc.mcCntlSetLastError(inst, "spindle is on, rpm:"..RPM.." rc:"..rc)
+		else
+			mc.mcCntlSetLastError(inst, "ERROR: spindle is OFF");
+		end
+				
+-- TODO: make this an option for how long it takes to spin up!
+
+		local spindleSpeedUpTime = 7.0 -- in seconds
+		CWUtilities.Sleep(spindleSpeedUpTime)
+		-- I'm not sure why, but doing the wait with gcode makes the entire startup process longer..it waits a time period after
+		-- the m3, and I don't know where that is. The sleep doesn't seem to make that happen. Super strange.
+--		local gcode = string.format("G04 P%.4f", spindleSpeedUpTime)
+--		mc.mcCntlGcodeExecuteWait(inst, gcode)
+	else
+		-- mc.mcSpindleSetDirection(inst, mc.MC_SPINDLE_FWD)
+		-- Probably should error out; changing the spindle direction when on could be 
+	end
+
+end
+
+
+-- testing
+if (mc.mcInEditor() == 1) then
+	m3()
+
+end
+

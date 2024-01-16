@@ -1,0 +1,16 @@
+%Spindle WarmUp Routine
+%Written by Lazerwolf
+%Gcode created: 01-Jan-2023  03:47PM
+M3 S6000.0
+G4 S 180
+M5
+G4 S 60
+M3 S12000.0
+G4 S 240
+M5
+G4 S 60
+M3 S18000.0
+G4 S 240
+M5
+M30
+%
