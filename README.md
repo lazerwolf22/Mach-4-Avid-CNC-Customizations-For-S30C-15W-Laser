@@ -3,7 +3,7 @@
 
 Customizations for the default Avid profile in Mach 4.
 
-### This is a fork of the original Corbin profile that is modified for the use the S30C spindle from CNCDepot and the Avid 15W laser using Avid Mach4 version 2.5.5. ### -Lazerwolf22
+### This is a modification of the original Corbin profile. I modified it for the S30C spindle from CNCDepot, integrated the code for the Avid 15W laser, and modified for use with Avid Mach4 version 2.5.5. ### -Lazerwolf22
 
 Installation and directions are currently located here: 
 [https://www.corbinstreehouse.com/blog/avid-cnc-atc-automatic-tool-changer-with-mach-4/]
