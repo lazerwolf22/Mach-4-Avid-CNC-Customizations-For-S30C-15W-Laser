@@ -1,3 +1,6 @@
+# ****This is NOT working yet, so do not use it*** If you have the same setup and would like to contribute to get it working then please do so.***
+
+
 # Mach 4 Avid CNC
  
 
